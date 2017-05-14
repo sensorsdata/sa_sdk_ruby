@@ -22,13 +22,15 @@ Once the SDK is successfully installed, use the Sensors Analytics SDK likes:
 ```ruby
   require 'sensors_analytics_sdk'
 
-  SA_URL = 'http://sa_host.com:8006/sa?token=xxx'
+  SensorsAnalytics.config do |conf|
+    conf.server_url = 'http://sa_host.com:8006/sa?token=xxx' # sa server url
+    #conf.keep_alive = true # use http persistent. need net-http-persistent gem
+    #conf.debug = false     # use debug
+    #conf.dry_run = false   # dry run
+    #conf.batch_size = 0    # flush in batch
+  end
 
-  consumer = SensorsAnalytics::DefaultConsumer.new(SA_URL)
-  sa = SensorsAnalytics::SensorsAnalytics.new(consumer)
-
-  distinct_id = "ABCDEF123456"
-  sa.track(distinct_id, "UserLogin", {"Source" : "HomePage"})
+  SensorsAnalytics.track("ABCDEF123456", "UserLogin", {"Source" : "HomePage"})
 ```
 
 Http keepalive is supported now. Add gem `net-http-persistent` to your `Gemfile`. Then it will use http keepalive by default.

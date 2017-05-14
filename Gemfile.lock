@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    sensors_analytics_sdk (1.6.0)
+    sensors_analytics_sdk (1.6.1)
 
 GEM
   remote: https://rubygems.org/
