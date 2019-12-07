@@ -33,6 +33,9 @@ module SensorsAnalytics
         @client ||= begin
           client = Net::HTTP::Persistent.new name: "sa_sdk"
           client.open_timeout = 10
+          if @uri.scheme == "https"
+            client.use_ssl = true
+          end
           client
         end
         @client.request(@uri, request)
@@ -41,6 +44,9 @@ module SensorsAnalytics
         client.open_timeout = 10
         client.continue_timeout = 10
         client.read_timeout = 10
+        if @uri.scheme == "https"
+            client.use_ssl = true
+        end
         client.request(request)
       end
     end
