@@ -5,7 +5,8 @@ require 'zlib'
 module SensorsAnalytics
   class SensorsAnalyticsConsumer
     def initialize(server_url)
-      @http_client = Http.new(server_url, keep_alive: true)
+      @http_client = Http.new(server_url,
+        keep_alive: ::SensorsAnalytics.conf.keep_alive)
     end
 
     def request!(event_list, headers = {})

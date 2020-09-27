@@ -19,4 +19,8 @@ module SensorsAnalytics
   # Debug模式下各种异常
   class DebugModeError < SensorsAnalyticsError
   end
+
+  # 错误的 server url
+  class WrongServerUrlError < SensorsAnalyticsError
+  end
 end
