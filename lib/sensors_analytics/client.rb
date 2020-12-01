@@ -100,6 +100,16 @@ module SensorsAnalytics
       _track_event(:profile_unset, distinct_id, distinct_id, nil, property_hash)
     end
 
+    # 上报 item 数据
+    def item_set(item_type, item_id, properties)
+      _track_item(:item_set, item_type, item_id, properties)
+    end
+
+    # 删除 item 数据
+    def item_delete(item_type, item_id)
+      _track_item(:item_delete, item_type, item_id, {})
+    end
+
     private
 
     def _track_event(event_type, distinct_id, origin_distinct_id, event_name, properties)
@@ -146,6 +156,48 @@ module SensorsAnalytics
         # TrackSignUp
         event[:event] = event_name
         event[:original_id] = origin_distinct_id
+      end
+
+      @consumer.send(event)
+    end
+
+    def _track_item(event_type, item_type, item_id, properties)
+      _assert_key_with_regex(:item_type, item_type)
+      _assert_key(:item_id, item_id)
+
+      if event_type == :item_set
+        _assert_properties(event_type, properties)
+      end
+
+      # 从事件属性中获取时间配置
+      event_time = _extract_time_from_properties(properties)
+      properties.delete(:$time)
+      properties.delete("$time")
+
+      lib_properties = _get_lib_properties
+
+      # event_type 有 item_set 和 item_delete 两种
+      event = {
+        type: event_type,
+        time: event_time,
+        item_id: item_id,
+        item_type: item_type,
+        lib: lib_properties,
+      }
+
+      if event_type == :item_set
+        # item_set 有 properties 属性
+        item_properties = {}
+
+        properties.each do |key, value|
+          if value.is_a?(Time)
+            item_properties[key] = value.strftime("%Y-%m-%d %H:%M:%S.#{(value.to_f * 1000.0).to_i % 1000}")
+          else
+            item_properties[key] = value
+          end
+        end
+
+        event[:properties] = item_properties
       end
 
       @consumer.send(event)
@@ -252,11 +304,11 @@ module SensorsAnalytics
         # profile_append 的属性必须为数组类型，且数组元素必须为字符串
         if event_type == :profile_append
           unless value.is_a?(Array)
-            raise IllegalDataError.new("The properties value of PROFILE INCREMENT must be an instance of Array[String].")
+            raise IllegalDataError.new("The properties value of PROFILE APPEND must be an instance of Array[String].")
           end
           value.each do |element|
             unless element.is_a?(String) || element.is_a?(Symbol)
-              raise IllegalDataError.new("The properties value of PROFILE INCREMENT must be an instance of Array[String].")
+              raise IllegalDataError.new("The properties value of PROFILE APPEND must be an instance of Array[String].")
             end
           end
         end
